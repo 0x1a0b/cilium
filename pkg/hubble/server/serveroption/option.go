@@ -72,14 +72,22 @@ func WithTCPListener(address string) Option {
 // owner is set to socketGroup.
 func WithUnixSocketListener(path string) Option {
 	return func(o *Options) error {
+		if o.Listener != nil {
+			return fmt.Errorf("listener already configured")
+		}
 		socketPath := strings.TrimPrefix(path, "unix://")
 		unix.Unlink(socketPath)
-		socket, err := net.Listen("unix", socketPath)
+		addr, err := net.ResolveUnixAddr("unix", socketPath)
+		if err != nil {
+			return err
+		}
+		socket, err := net.ListenUnix("unix", addr)
 		if err != nil {
 			return err
 		}
 		if os.Getuid() == 0 {
 			if err := api.SetDefaultPermissions(socketPath); err != nil {
+				socket.Close()
 				return err
 			}
 		}
