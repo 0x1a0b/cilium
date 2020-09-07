@@ -48,7 +48,7 @@ func New() *cobra.Command {
 		logging.DefaultLogger.SetLevel(logrus.DebugLevel)
 	}
 	if err := vp.ReadInConfig(); err != nil {
-		logger.WithError(err).Warnf("Failed to read config from file '%s'", configFilePath)
+		logger.WithError(err).Debugf("Failed to read config from file '%s'", configFilePath)
 	}
 	rootCmd.AddCommand(
 		completion.New(),
